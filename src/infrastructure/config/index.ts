@@ -9,6 +9,8 @@ export type ConfigType = {
   accessTime: string;
   refreshSecret: string;
   refreshTime: string;
+  userEmail: string;
+  appPassword: string;
 };
 
 const requiredVariables = [
@@ -19,6 +21,8 @@ const requiredVariables = [
   'JWT_ACCESS_TIME',
   'JWT_REFRESH_SECRET',
   'JWT_REFRESH_TIME',
+  'APP_PASSWORD',
+  'USER_EMAIL',
 ];
 
 const missingVariables = requiredVariables.filter((variable) => {
@@ -39,4 +43,6 @@ export const config: ConfigType = {
   accessTime: process.env.JWT_ACCESS_TIME,
   refreshSecret: process.env.JWT_REFRESH_SECRET,
   refreshTime: process.env.JWT_REFRESH_TIME,
+  userEmail: process.env.USER_EMAIL,
+  appPassword: process.env.APP_PASSWORD,
 };

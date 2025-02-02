@@ -11,4 +11,4 @@ import { CustomCacheService } from './cache.service';
   providers: [CustomCacheService],
   exports: [CustomCacheService],
 })
-export class CacheCustomModule {}
+export class CustomCacheModule {}

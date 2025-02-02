@@ -1,15 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 
 @Injectable()
 export class CustomCacheService {
-  constructor(private readonly cache: Cache) {}
+  constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {}
 
   async set(key: string, value: string, ttl?: number): Promise<void> {
-    await this.cache.set(key, value, ttl);
+    if (ttl) {
+      await this.cache.set(key, value, ttl);
+    } else {
+      await this.cache.set(key, value);
+    }
   }
 
   async get(key: string): Promise<string | null> {
-    return this.cache.get(key);
+    return (await this.cache.get<string>(key)) || null;
   }
 }

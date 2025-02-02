@@ -20,6 +20,14 @@ export class BaseService<CreateDto, Entity> {
     };
   }
 
+  async save(dto: CreateDto) {
+    let created_data = this.repository.create({
+      ...dto,
+    }) as unknown as Entity;
+    created_data = await this.repository.save(created_data);
+    return created_data;
+  }
+
   async findAll() {
     const data = (await this.repository.find()) as Entity[];
     return {

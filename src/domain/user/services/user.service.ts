@@ -11,7 +11,18 @@ export class UserService extends BaseService<
   CreateUserDto,
   DeepPartial<UserEntity>
 > {
-  constructor(@InjectRepository(UserEntity) userRepository: UserRepository) {
-    super(userRepository);
+  constructor(@InjectRepository(UserEntity) repository: UserRepository) {
+    super(repository);
+  }
+  async isUsernameExists(username: string): Promise<boolean> {
+    if (!username) return false;
+    const user = await this.repository.findOneBy({ username });
+    return !!user;
+  }
+
+  async isEmailExists(email: string): Promise<boolean> {
+    if (!email) return false;
+    const user = await this.repository.findOneBy({ email });
+    return !!user;
   }
 }
