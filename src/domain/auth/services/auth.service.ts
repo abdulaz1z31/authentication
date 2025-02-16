@@ -6,7 +6,7 @@ import {
 import { RegisterAuthDto } from '../dtos/register.dto';
 import { LoginAuthDto } from '../dtos/login.dto';
 import { UserService } from 'src/domain/user';
-import { CustomCacheService } from 'src/infrastructure/database/cache/cache.service';
+import { RedisService } from 'src/infrastructure/redis/redis.service';
 import { HashingService, MailService, TokenService } from 'src/infrastructure';
 import { VerifyDto } from '../dtos/verify.dto';
 
@@ -14,7 +14,7 @@ import { VerifyDto } from '../dtos/verify.dto';
 export class AuthService {
   constructor(
     private readonly userService: UserService,
-    private readonly cacheService: CustomCacheService,
+    private readonly redisService: RedisService,
     private readonly mailerService: MailService,
     private readonly hashingService: HashingService,
     private readonly jwtService: TokenService,
@@ -32,7 +32,7 @@ export class AuthService {
     }
     const otp = this.otpGenerator();
     await Promise.all([
-      this.cacheService.set(data.username, otp, 240 * 1000),
+      this.redisService.set(data.username, otp, 240 * 1000),
       this.mailerService.sendOtp(data.email, otp),
       this.hashingService.generate(data.password).then((hash) => {
         data.password = hash;
@@ -53,7 +53,7 @@ export class AuthService {
     const user = await this.userService.getRepository.findOneBy({
       id: data.id,
     });
-    const otpCode = await this.cacheService.get(user.username);
+    const otpCode = await this.redisService.get(user.username);
     console.log(otpCode);
 
     if (!otpCode) {

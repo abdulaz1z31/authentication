@@ -3,9 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthModule, UserModule } from './application';
 import {
-  CustomCacheModule,
+  RedisModuleCustom,
   DbModule,
-  GuardService,
+  CustomJwtService,
   MailModule,
 } from './infrastructure';
 
@@ -14,7 +14,7 @@ import {
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    CustomCacheModule,
+    RedisModuleCustom,
     DbModule,
     MailModule,
     UserModule,
@@ -24,7 +24,7 @@ import {
   providers: [
     {
       provide: APP_GUARD,
-      useClass: GuardService,
+      useClass: CustomJwtService,
     },
   ],
 })

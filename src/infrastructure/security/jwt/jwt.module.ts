@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { GuardService } from './guard.service';
+import { CustomJwtService } from './customjwt.service';
 import { TokenService } from './jwt.service';
 import { config } from 'src/infrastructure/config';
 
@@ -25,7 +25,7 @@ import { config } from 'src/infrastructure/config';
       }),
     }),
   ],
-  providers: [GuardService, TokenService],
-  exports: [GuardService, TokenService],
+  providers: [CustomJwtService, TokenService],
+  exports: [CustomJwtService, TokenService],
 })
-export class GuardModule {}
+export class CustomJwtModule {}

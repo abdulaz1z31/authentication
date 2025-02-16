@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { PUBLIC_KEY } from './guard.decorator';
+import { PUBLIC_KEY } from './jwt.decorator';
 import { Request } from 'express';
 import { config } from 'src/infrastructure/config';
 
 @Injectable()
-export class GuardService implements CanActivate {
+export class CustomJwtService implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private reflector: Reflector,

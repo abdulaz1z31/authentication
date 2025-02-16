@@ -3,14 +3,16 @@ import { AuthService } from 'src/domain/auth';
 import { AuthController } from './controllers/auth.controller';
 import { UserModule } from '../user/user.module';
 import {
-  CustomCacheModule,
+  RedisModuleCustom,
   HashingService,
   MailModule,
+  TokenService,
+  CustomJwtModule,
 } from 'src/infrastructure';
 
 @Module({
-  imports: [UserModule, CustomCacheModule, MailModule],
+  imports: [UserModule, RedisModuleCustom, MailModule, CustomJwtModule],
   controllers: [AuthController],
-  providers: [AuthService, HashingService],
+  providers: [AuthService, HashingService, TokenService],
 })
 export class AuthModule {}
