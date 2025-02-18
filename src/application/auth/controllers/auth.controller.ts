@@ -29,34 +29,29 @@ export class AuthController {
   }
 
   // @Post('forget-password')
-  // async forgetPassword(@Body() data: { email: string }) {
-  //   return await this.authService.forgetPassword(data.email);
-  // }
+  // async forgetPassword() {}
 
   // @Post('change-password')
-  // async changePassword(@Body() newData: ChangePasswordDto) {
-  //   return await this.authService.changePassword(newData);
-  // }
+  // async changePassword() {}
 
   // @Post('reset-password')
-  // async resetPassword(
-  //   @Req() request: Request,
-  //   @Body() data: { password: string },
-  // ) {
-  //   const payload = request.user;
-  //   return await this.authService.resetPassword(payload, data.password);
-  // }
+  // async resetPassword() {}
+
   // @Post('resend-otp')
-  // async resendOtp(@Body() data: { email: string }) {
-  //   return await this.authService.resendOtp(data.email);
-  // }
+  // async resendOtp() {}
 
   // @Delete('delete')
-  // async deleteAccount(@Req() request: Request) {
-  //   const user = request.user;
-  //   return await this.authService.deleteAccount(user);
-  // }
-  async refreshToken() {}
-  async savetoken() {}
-  async logout() {}
+  // async deleteAccount() {}
+
+  // @Post('refresh-tokens')
+  // async refreshTokens() {}
+
+  // @Post('logout')
+  // async logout() {}
+
+  // @Post('singin/google')
+  // async singInWithGoogle() {}
+
+  // @Post('singup/google')
+  // async singUpWithGoogle() {}
 }

@@ -32,7 +32,7 @@ export class AuthService {
     }
     const otp = this.otpGenerator();
     await Promise.all([
-      this.redisService.set(data.username, otp, 240 * 1000),
+      this.redisService.set(data.username, otp, 240),
       this.mailerService.sendOtp(data.email, otp),
       this.hashingService.generate(data.password).then((hash) => {
         data.password = hash;
@@ -54,10 +54,8 @@ export class AuthService {
       id: data.id,
     });
     const otpCode = await this.redisService.get(user.username);
-    console.log(otpCode);
-
     if (!otpCode) {
-      throw new BadRequestException('Otp not found');
+      throw new BadRequestException('Time expired');
     }
     if (otpCode != data.otp) {
       throw new BadRequestException('Otp not valid');
@@ -79,12 +77,12 @@ export class AuthService {
     if (!user.is_active) {
       throw new BadRequestException('User not activated');
     }
-    const mathPassword = this.hashingService.compare(
+    const matchPassword = this.hashingService.compare(
       data.password,
       user.password,
     );
-    if (mathPassword) {
-      throw new BadRequestException('Email or password not valid');
+    if (!matchPassword) {
+      throw new BadRequestException('Invalid credentials');
     }
     const payload = {
       id: user.id,
@@ -101,6 +99,16 @@ export class AuthService {
       },
     };
   }
+  // async singUpWithGoogle() {}
+  // async singInWithGoogle() {}
+  // async resetPassword() {}
+  // async forgetPassword() {}
+  // async changePassword() {}
+  // async resendOtp() {}
+  // async refreshTokens() {}
+  // async logout() {}
+  // async deleteAccount() {}
+
   private otpGenerator(): string {
     const otp = Math.floor((Math.random() * 10 ** 6 * 1.145) % 10 ** 6);
     return String(otp);
