@@ -9,6 +9,8 @@ import { UserService } from 'src/domain/user';
 import { RedisService } from 'src/infrastructure/redis/redis.service';
 import { HashingService, MailService, TokenService } from 'src/infrastructure';
 import { VerifyDto } from '../dtos/verify.dto';
+import { ResetPasswordDto } from '../dtos/reset.dto';
+import { ForgetPasswordDto } from '../dtos/forget.dto';
 
 @Injectable()
 export class AuthService {
@@ -99,11 +101,39 @@ export class AuthService {
       },
     };
   }
-  // async singUpWithGoogle() {}
-  // async singInWithGoogle() {}
-  // async resetPassword() {}
-  // async forgetPassword() {}
-  // async changePassword() {}
+  async resetPassword(dto: ResetPasswordDto, id: string) {
+    const hashPassword = await this.hashingService.generate(dto.password);
+    dto.password = hashPassword;
+    await this.userService.getRepository.update(id, dto);
+    return {
+      message: 'Password updated',
+      statusCode: 200,
+      data: {},
+    };
+  }
+  async forgetPassword(dto: ForgetPasswordDto) {
+    const user = await this.userService.findByEmail(dto.email);
+    const payload = {
+      id: user.id,
+    };
+    const forgetToken = this.jwtService.createForgetToken(payload);
+    return {
+      message: 'Success',
+      status: 200,
+      data: { forgetToken },
+    };
+  }
+  async changePassword(token: string, dto: ResetPasswordDto) {
+    const decode = await this.jwtService.verifyForgetToken(token);
+    const hashPassword = await this.hashingService.generate(dto.password);
+    dto.password = hashPassword;
+    await this.userService.getRepository.update(decode.id, dto);
+    return {
+      message: 'Updated',
+      statusCode: 200,
+      data: {},
+    };
+  }
   // async resendOtp() {}
   // async refreshTokens() {}
   // async logout() {}

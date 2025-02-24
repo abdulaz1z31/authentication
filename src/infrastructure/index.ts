@@ -4,7 +4,7 @@ export * from './security/hashing/hashing.service';
 export * from './redis/redis.module';
 export * from './mailer/mailer.module';
 export * from './mailer/mailer.service';
-export * from './security/jwt/jwt.decorator';
+export * from '../common/decorators/public.decorator';
 export * from './security/jwt/jwt.module';
 export * from './security/jwt/customjwt.service';
 export * from './security/jwt/jwt.service';

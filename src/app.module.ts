@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
 import { AuthModule, UserModule } from './application';
 import {
   RedisModuleCustom,
   DbModule,
-  CustomJwtService,
   MailModule,
+  CustomJwtModule,
 } from './infrastructure';
+import { RolesModule } from './infrastructure/security/guards/roles.module';
 
 @Module({
   imports: [
@@ -19,13 +19,10 @@ import {
     MailModule,
     UserModule,
     AuthModule,
+    RolesModule,
+    CustomJwtModule,
   ],
   controllers: [],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: CustomJwtService,
-    },
-  ],
+  providers: [],
 })
 export class AppModule {}

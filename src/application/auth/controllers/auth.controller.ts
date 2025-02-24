@@ -1,11 +1,13 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Param } from '@nestjs/common';
+import { UserID, Public } from 'src/common/decorators';
 import {
   AuthService,
   LoginAuthDto,
   RegisterAuthDto,
   VerifyDto,
 } from 'src/domain/auth';
-import { Public } from 'src/infrastructure';
+import { ForgetPasswordDto } from 'src/domain/auth/dtos/forget.dto';
+import { ResetPasswordDto } from 'src/domain/auth/dtos/reset.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -28,14 +30,20 @@ export class AuthController {
     return await this.authService.login(loginData);
   }
 
-  // @Post('forget-password')
-  // async forgetPassword() {}
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto, @UserID() id: string) {
+    return await this.authService.resetPassword(dto, id);
+  }
 
-  // @Post('change-password')
-  // async changePassword() {}
+  @Post('forget-password')
+  async forgetPassword(dto: ForgetPasswordDto) {
+    return await this.authService.forgetPassword(dto);
+  }
 
-  // @Post('reset-password')
-  // async resetPassword() {}
+  @Post('change-password')
+  async changePassword(@Param('token') token: string, dto: ResetPasswordDto) {
+    return await this.authService.changePassword(token, dto);
+  }
 
   // @Post('resend-otp')
   // async resendOtp() {}
@@ -48,10 +56,4 @@ export class AuthController {
 
   // @Post('logout')
   // async logout() {}
-
-  // @Post('singin/google')
-  // async singInWithGoogle() {}
-
-  // @Post('singup/google')
-  // async singUpWithGoogle() {}
 }

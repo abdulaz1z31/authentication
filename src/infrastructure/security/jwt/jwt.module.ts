@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { CustomJwtService } from './customjwt.service';
 import { TokenService } from './jwt.service';
 import { config } from 'src/infrastructure/config';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -25,7 +26,14 @@ import { config } from 'src/infrastructure/config';
       }),
     }),
   ],
-  providers: [CustomJwtService, TokenService],
+  providers: [
+    CustomJwtService,
+    TokenService,
+    {
+      provide: APP_GUARD,
+      useClass: CustomJwtService,
+    },
+  ],
   exports: [CustomJwtService, TokenService],
 })
 export class CustomJwtModule {}

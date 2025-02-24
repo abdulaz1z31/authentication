@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { PUBLIC_KEY } from './jwt.decorator';
+import { PUBLIC_KEY } from '../../../common/decorators/public.decorator';
 import { Request } from 'express';
 import { config } from 'src/infrastructure/config';
 

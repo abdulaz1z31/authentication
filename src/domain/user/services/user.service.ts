@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial } from 'typeorm';
 import { BaseService } from 'src/common';
@@ -18,6 +18,14 @@ export class UserService extends BaseService<
     if (!username) return false;
     const user = await this.repository.findOneBy({ username });
     return !!user;
+  }
+
+  async findByEmail(email: string): Promise<UserEntity> {
+    const user = await this.repository.findOneBy({ email });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   async isEmailExists(email: string): Promise<boolean> {
