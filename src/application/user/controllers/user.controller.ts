@@ -1,24 +1,13 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto, UserService } from 'src/domain';
+import { Controller, Get, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Roles } from 'src/common';
+import { UpdateUserDto, UserRoles, UserService } from 'src/domain';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
-
   @Get()
+  @Roles(UserRoles.admin, UserRoles.superAdmin)
   findAll() {
     return this.userService.findAll();
   }
@@ -32,8 +21,8 @@ export class UserController {
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
   }
-
   @Delete(':id')
+  @Roles(UserRoles.admin, UserRoles.superAdmin)
   remove(@Param('id') id: string) {
     return this.userService.delete(id);
   }
