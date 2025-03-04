@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param } from '@nestjs/common';
+import { Controller, Post, Body, Param, Delete } from '@nestjs/common';
 import { UserID, Public } from 'src/common/decorators';
 import {
   AuthService,
@@ -45,15 +45,18 @@ export class AuthController {
     return await this.authService.changePassword(token, dto);
   }
 
-  // @Post('resend-otp')
-  // async resendOtp() {}
+  @Delete('delete/me')
+  async deleteAccount(@UserID() id: string) {
+    return await this.authService.deleteAccount(id);
+  }
 
-  // @Delete('delete')
-  // async deleteAccount() {}
+  @Post('resend-otp')
+  async resendOtp(@Body('email') email: string) {
+    return await this.authService.resendOtp(email);
+  }
 
-  // @Post('refresh-tokens')
-  // async refreshTokens() {}
-
-  // @Post('logout')
-  // async logout() {}
+  @Post('refresh-tokens')
+  async refreshTokens(@Body('refresh_token') token: string) {
+    return await this.authService.refreshTokens(token);
+  }
 }

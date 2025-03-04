@@ -6,13 +6,12 @@ import {
   RedisModuleCustom,
   HashingService,
   MailModule,
-  TokenService,
   CustomJwtModule,
 } from 'src/infrastructure';
 
 @Module({
   imports: [UserModule, RedisModuleCustom, MailModule, CustomJwtModule],
   controllers: [AuthController],
-  providers: [AuthService, HashingService, TokenService],
+  providers: [AuthService, HashingService],
 })
 export class AuthModule {}

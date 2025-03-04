@@ -1,36 +1,93 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial } from 'typeorm';
-import { BaseService } from 'src/common';
-import { CreateUserDto } from '../dtos/create-user.dto';
 import { UserEntity } from '../entities/user.entity';
-import { UserRepository } from '../repositories/user.repository';
+import { Repository } from 'typeorm';
+import { CreateUserDto } from '../dtos/create-user.dto';
+import { HashingService } from 'src/infrastructure';
+import { UpdateUserDto } from '../dtos/update-user.dto';
+import { UserRoles } from '../constants/user-role.enum';
 
 @Injectable()
-export class UserService extends BaseService<
-  CreateUserDto,
-  DeepPartial<UserEntity>
-> {
-  constructor(@InjectRepository(UserEntity) repository: UserRepository) {
-    super(repository);
-  }
-  async isUsernameExists(username: string): Promise<boolean> {
+export class UserService {
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+    private readonly hashingService: HashingService,
+  ) {}
+  async isUsernameExists(username: string) {
     if (!username) return false;
-    const user = await this.repository.findOneBy({ username });
+    const user = await this.userRepository.findOneBy({ username });
+    return !!user;
+  }
+
+  async isEmailExists(email: string): Promise<boolean> {
+    if (!email) return false;
+    const user = await this.userRepository.findOneBy({ email });
     return !!user;
   }
 
   async findByEmail(email: string): Promise<UserEntity> {
-    const user = await this.repository.findOneBy({ email });
+    const user = await this.userRepository.findOneBy({ email });
     if (!user) {
       throw new NotFoundException('User not found');
     }
     return user;
   }
 
-  async isEmailExists(email: string): Promise<boolean> {
-    if (!email) return false;
-    const user = await this.repository.findOneBy({ email });
-    return !!user;
+  async findAll(): Promise<UserEntity[]> {
+    const users = await this.userRepository.find();
+    return users;
+  }
+
+  async findByUsername(username: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOneBy({ username });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  async create(dto: CreateUserDto): Promise<UserEntity> {
+    const hashPassword = await this.hashingService.encrypt(dto.password);
+    const user = await this.userRepository.save({
+      ...dto,
+      password: hashPassword,
+    });
+    return user;
+  }
+
+  async findById(id: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  async findByRole(role: UserRoles) {
+    const users = await this.userRepository.find({ where: { role } });
+    return users;
+  }
+
+  async update(id: string, dto: UpdateUserDto) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    if (dto?.password) {
+      const hashPassword = await this.hashingService.encrypt(dto.password);
+      dto.password = hashPassword;
+    }
+    await this.userRepository.update(id, dto);
+    Object.assign(user, dto);
+    return user;
+  }
+
+  async delete(id: string) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    await this.userRepository.delete(id);
   }
 }

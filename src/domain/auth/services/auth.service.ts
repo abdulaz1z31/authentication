@@ -36,12 +36,9 @@ export class AuthService {
     await Promise.all([
       this.redisService.set(data.username, otp, 240),
       this.mailerService.sendOtp(data.email, otp),
-      this.hashingService.generate(data.password).then((hash) => {
-        data.password = hash;
-      }),
     ]);
 
-    const user = await this.userService.save(data);
+    const user = await this.userService.create(data);
     return {
       message: 'Created',
       statusCode: 201,
@@ -52,9 +49,7 @@ export class AuthService {
     };
   }
   async verify(data: VerifyDto) {
-    const user = await this.userService.getRepository.findOneBy({
-      id: data.id,
-    });
+    const user = await this.userService.findById(data.id);
     const otpCode = await this.redisService.get(user.username);
     if (!otpCode) {
       throw new BadRequestException('Time expired');
@@ -65,7 +60,7 @@ export class AuthService {
     const updateData = {
       is_active: true,
     };
-    await this.userService.getRepository.update(data.id, updateData);
+    await this.userService.update(data.id, updateData);
     return {
       statusCode: 200,
       message: 'Activated successfully',
@@ -73,17 +68,15 @@ export class AuthService {
     };
   }
   async login(data: LoginAuthDto) {
-    const user = await this.userService.getRepository.findOneBy({
-      email: data.email,
-    });
+    const user = await this.userService.findByEmail(data.email);
     if (!user.is_active) {
       throw new BadRequestException('User not activated');
     }
-    const matchPassword = this.hashingService.compare(
+    const checkPassword = await this.hashingService.compare(
       data.password,
       user.password,
     );
-    if (!matchPassword) {
+    if (!checkPassword) {
       throw new BadRequestException('Invalid credentials');
     }
     const payload = {
@@ -102,9 +95,9 @@ export class AuthService {
     };
   }
   async resetPassword(dto: ResetPasswordDto, id: string) {
-    const hashPassword = await this.hashingService.generate(dto.password);
+    const hashPassword = await this.hashingService.encrypt(dto.password);
     dto.password = hashPassword;
-    await this.userService.getRepository.update(id, dto);
+    await this.userService.update(id, dto);
     return {
       message: 'Password updated',
       statusCode: 200,
@@ -125,19 +118,50 @@ export class AuthService {
   }
   async changePassword(token: string, dto: ResetPasswordDto) {
     const decode = await this.jwtService.verifyForgetToken(token);
-    const hashPassword = await this.hashingService.generate(dto.password);
+    const hashPassword = await this.hashingService.encrypt(dto.password);
     dto.password = hashPassword;
-    await this.userService.getRepository.update(decode.id, dto);
+    await this.userService.update(decode.id, dto);
     return {
       message: 'Updated',
       statusCode: 200,
       data: {},
     };
   }
-  // async resendOtp() {}
-  // async refreshTokens() {}
-  // async logout() {}
-  // async deleteAccount() {}
+  async deleteAccount(id: string) {
+    await this.userService.delete(id);
+    return {
+      message: 'Success',
+      statusCode: 200,
+      data: {},
+    };
+  }
+  async refreshTokens(refresh_token: string) {
+    const decode = await this.jwtService.verifyRefreshToken(refresh_token);
+    const payload = {
+      id: decode.id,
+      role: decode.role,
+    };
+    const accessToken = this.jwtService.createAccessToken(payload);
+    return {
+      message: 'success',
+      statusCode: 200,
+      data: { accessToken },
+    };
+  }
+
+  async resendOtp(email: string) {
+    const user = await this.userService.findByEmail(email);
+    const otp = this.otpGenerator();
+    await Promise.all([
+      this.redisService.set(user.username, otp, 240),
+      this.mailerService.sendOtp(user.email, otp),
+    ]);
+    return {
+      message: 'Success',
+      status: 200,
+      data: {},
+    };
+  }
 
   private otpGenerator(): string {
     const otp = Math.floor((Math.random() * 10 ** 6 * 1.145) % 10 ** 6);
