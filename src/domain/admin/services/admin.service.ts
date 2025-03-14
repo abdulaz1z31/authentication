@@ -1,12 +1,12 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateAdminDto } from '../dtos/create-admin.dto';
 import { UpdateAdminDto } from '../dtos/update-admin.dto';
-import { UserRoles, UserService } from 'src/domain/user';
+import { UserEntity, UserRoles, UserService } from 'src/domain/user';
 
 @Injectable()
 export class AdminService {
   constructor(private readonly userService: UserService) {}
-  async create(dto: CreateAdminDto) {
+  async create(dto: CreateAdminDto): Promise<UserEntity> {
     const [exitingUsername, exitingEmail] = await Promise.all([
       this.userService.isUsernameExists(dto.username),
       this.userService.isEmailExists(dto.email),
@@ -18,49 +18,23 @@ export class AdminService {
       throw new ConflictException('Email already exists');
     }
     const user = await this.userService.create(dto);
-    return {
-      message: 'Created',
-      statusCode: 201,
-      data: {
-        id: user.id,
-        created_at: user.created_at,
-      },
-    };
+    delete user.password;
+    return user;
   }
 
-  async findAll() {
-    const admins = await this.userService.findByRole(UserRoles.admin);
-    return {
-      message: 'success',
-      statusCode: 200,
-      data: admins,
-    };
+  async findAll(): Promise<UserEntity[]> {
+    return await this.userService.findByRole(UserRoles.admin);
   }
 
-  async findOne(id: string) {
-    const admin = await this.userService.findById(id);
-    return {
-      message: 'Success',
-      statusCode: 200,
-      data: admin,
-    };
+  async findOne(id: string): Promise<UserEntity> {
+    return await this.userService.findById(id);
   }
 
-  async update(id: string, dto: UpdateAdminDto) {
-    const admin = await this.userService.update(id, dto);
-    return {
-      message: 'Updated',
-      statusCode: 200,
-      data: admin,
-    };
+  async update(id: string, dto: UpdateAdminDto): Promise<UserEntity> {
+    return await this.userService.update(id, dto);
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<void> {
     await this.userService.delete(id);
-    return {
-      message: 'Deleted',
-      statusCode: 200,
-      data: {},
-    };
   }
 }

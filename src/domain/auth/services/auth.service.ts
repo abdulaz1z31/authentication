@@ -5,12 +5,18 @@ import {
 } from '@nestjs/common';
 import { RegisterAuthDto } from '../dtos/register.dto';
 import { LoginAuthDto } from '../dtos/login.dto';
-import { UserService } from 'src/domain/user';
+import { UserEntity, UserService } from 'src/domain/user';
 import { RedisService } from 'src/infrastructure/redis/redis.service';
 import { HashingService, MailService, TokenService } from 'src/infrastructure';
 import { VerifyDto } from '../dtos/verify.dto';
 import { ResetPasswordDto } from '../dtos/reset.dto';
 import { ForgetPasswordDto } from '../dtos/forget.dto';
+import {
+  IForget,
+  ILogin,
+  IMessage,
+  IRefreshAccess,
+} from '../interface/auth.interface';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +27,7 @@ export class AuthService {
     private readonly hashingService: HashingService,
     private readonly jwtService: TokenService,
   ) {}
-  async register(data: RegisterAuthDto) {
+  async register(data: RegisterAuthDto): Promise<UserEntity> {
     const [exitingUsername, exitingEmail] = await Promise.all([
       this.userService.isUsernameExists(data.username),
       this.userService.isEmailExists(data.email),
@@ -39,16 +45,10 @@ export class AuthService {
     ]);
 
     const user = await this.userService.create(data);
-    return {
-      message: 'Created',
-      statusCode: 201,
-      data: {
-        id: user.id,
-        created_at: user.created_at,
-      },
-    };
+    delete user.password;
+    return user;
   }
-  async verify(data: VerifyDto) {
+  async verify(data: VerifyDto): Promise<IMessage> {
     const user = await this.userService.findById(data.id);
     const otpCode = await this.redisService.get(user.username);
     if (!otpCode) {
@@ -62,12 +62,10 @@ export class AuthService {
     };
     await this.userService.update(data.id, updateData);
     return {
-      statusCode: 200,
       message: 'Activated successfully',
-      data: {},
     };
   }
-  async login(data: LoginAuthDto) {
+  async login(data: LoginAuthDto): Promise<ILogin> {
     const user = await this.userService.findByEmail(data.email);
     if (!user.is_active) {
       throw new BadRequestException('User not activated');
@@ -86,56 +84,44 @@ export class AuthService {
     const accessToken = this.jwtService.createAccessToken(payload);
     const refreshToken = this.jwtService.createRefreshToken(payload);
     return {
-      statusCode: 200,
-      message: 'Logged in',
-      data: {
-        accessToken,
-        refreshToken,
-      },
+      accessToken,
+      refreshToken,
     };
   }
-  async resetPassword(dto: ResetPasswordDto, id: string) {
+  async resetPassword(dto: ResetPasswordDto, id: string): Promise<IMessage> {
     const hashPassword = await this.hashingService.encrypt(dto.password);
     dto.password = hashPassword;
     await this.userService.update(id, dto);
     return {
       message: 'Password updated',
-      statusCode: 200,
-      data: {},
     };
   }
-  async forgetPassword(dto: ForgetPasswordDto) {
+  async forgetPassword(dto: ForgetPasswordDto): Promise<IForget> {
     const user = await this.userService.findByEmail(dto.email);
     const payload = {
       id: user.id,
     };
     const forgetToken = this.jwtService.createForgetToken(payload);
     return {
-      message: 'Success',
-      status: 200,
-      data: { forgetToken },
+      forgetToken,
     };
   }
-  async changePassword(token: string, dto: ResetPasswordDto) {
+  async changePassword(
+    token: string,
+    dto: ResetPasswordDto,
+  ): Promise<IMessage> {
     const decode = await this.jwtService.verifyForgetToken(token);
     const hashPassword = await this.hashingService.encrypt(dto.password);
     dto.password = hashPassword;
     await this.userService.update(decode.id, dto);
     return {
-      message: 'Updated',
-      statusCode: 200,
-      data: {},
+      message: 'Passwrod updated',
     };
   }
-  async deleteAccount(id: string) {
+  async deleteAccount(id: string): Promise<void> {
     await this.userService.delete(id);
-    return {
-      message: 'Success',
-      statusCode: 200,
-      data: {},
-    };
   }
-  async refreshTokens(refresh_token: string) {
+  async refreshTokens(refresh_token: string): Promise<IRefreshAccess> {
     const decode = await this.jwtService.verifyRefreshToken(refresh_token);
     const payload = {
       id: decode.id,
@@ -143,24 +129,17 @@ export class AuthService {
     };
     const accessToken = this.jwtService.createAccessToken(payload);
     return {
-      message: 'success',
-      statusCode: 200,
-      data: { accessToken },
+      accessToken,
     };
   }
 
-  async resendOtp(email: string) {
+  async resendOtp(email: string): Promise<void> {
     const user = await this.userService.findByEmail(email);
     const otp = this.otpGenerator();
     await Promise.all([
       this.redisService.set(user.username, otp, 240),
       this.mailerService.sendOtp(user.email, otp),
     ]);
-    return {
-      message: 'Success',
-      status: 200,
-      data: {},
-    };
   }
 
   private otpGenerator(): string {

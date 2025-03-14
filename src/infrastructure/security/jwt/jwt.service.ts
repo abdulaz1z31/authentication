@@ -8,29 +8,29 @@ export class TokenService {
 
   createAccessToken(payload: any): string {
     return this.jwtService.sign(payload, {
-      secret: config.accessSecret,
-      expiresIn: config.accessTime,
+      secret: config.ACCESS_SECRET,
+      expiresIn: config.ACCESS_TIME,
     });
   }
 
   createRefreshToken(payload: any): string {
     return this.jwtService.sign(payload, {
-      secret: config.refreshSecret,
-      expiresIn: config.refreshTime,
+      secret: config.REFRESH_SECRET,
+      expiresIn: config.REFRESH_TIME,
     });
   }
 
   createForgetToken(payload: any): string {
     return this.jwtService.sign(payload, {
-      secret: config.refreshSecret,
-      expiresIn: config.refreshTime,
+      secret: config.REFRESH_SECRET,
+      expiresIn: config.REFRESH_TIME,
     });
   }
 
   async verifyAccessToken(token: string): Promise<any> {
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: config.accessSecret,
+        secret: config.ACCESS_SECRET,
       });
       return payload;
     } catch (error) {
@@ -42,7 +42,7 @@ export class TokenService {
   async verifyRefreshToken(token: string): Promise<any> {
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: config.refreshSecret,
+        secret: config.REFRESH_SECRET,
       });
       return payload;
     } catch (error) {
@@ -54,7 +54,7 @@ export class TokenService {
   async verifyForgetToken(token: string): Promise<any> {
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: config.refreshSecret,
+        secret: config.REFRESH_SECRET,
       });
       return payload;
     } catch (error) {

@@ -32,7 +32,7 @@ export class CustomJwtService implements CanActivate {
     }
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: config.accessSecret,
+        secret: config.ACCESS_SECRET,
       });
       request.user = payload;
     } catch {

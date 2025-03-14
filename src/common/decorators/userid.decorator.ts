@@ -21,7 +21,7 @@ export const UserID = createParamDecorator(
     }
     try {
       const jwtService = new JwtService({
-        secret: config.accessSecret,
+        secret: config.ACCESS_SECRET,
       });
       const decoded = await jwtService.verifyAsync(token);
       return decoded['id'];

@@ -2,25 +2,25 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 export type ConfigType = {
-  appPort: number;
-  dbUrl: string;
-  nodeEnv: string;
-  accessSecret: string;
-  accessTime: string;
-  refreshSecret: string;
-  refreshTime: string;
-  userEmail: string;
-  appPassword: string;
+  PORT: number;
+  DB_URL: string;
+  NODE_ENV: string;
+  ACCESS_SECRET: string;
+  ACCESS_TIME: string;
+  REFRESH_SECRET: string;
+  REFRESH_TIME: string;
+  USER_EMAIL: string;
+  APP_PASSWORD: string;
 };
 
 const requiredVariables = [
-  'APP_PORT',
+  'PORT',
   'DB_URL',
   'NODE_ENV',
-  'JWT_ACCESS_SECRET',
-  'JWT_ACCESS_TIME',
-  'JWT_REFRESH_SECRET',
-  'JWT_REFRESH_TIME',
+  'ACCESS_SECRET',
+  'ACCESS_TIME',
+  'REFRESH_SECRET',
+  'REFRESH_TIME',
   'APP_PASSWORD',
   'USER_EMAIL',
 ];
@@ -36,13 +36,13 @@ if (missingVariables.length > 0) {
 }
 
 export const config: ConfigType = {
-  appPort: +process.env.APP_PORT,
-  dbUrl: process.env.DB_URL,
-  nodeEnv: process.env.NODE_ENV,
-  accessSecret: process.env.JWT_ACCESS_SECRET,
-  accessTime: process.env.JWT_ACCESS_TIME,
-  refreshSecret: process.env.JWT_REFRESH_SECRET,
-  refreshTime: process.env.JWT_REFRESH_TIME,
-  userEmail: process.env.USER_EMAIL,
-  appPassword: process.env.APP_PASSWORD,
+  PORT: +process.env.APP_PORT,
+  DB_URL: process.env.DB_URL,
+  NODE_ENV: process.env.NODE_ENV,
+  ACCESS_SECRET: process.env.JWT_ACCESS_SECRET,
+  ACCESS_TIME: process.env.JWT_ACCESS_TIME,
+  REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
+  REFRESH_TIME: process.env.JWT_REFRESH_TIME,
+  USER_EMAIL: process.env.USER_EMAIL,
+  APP_PASSWORD: process.env.APP_PASSWORD,
 };

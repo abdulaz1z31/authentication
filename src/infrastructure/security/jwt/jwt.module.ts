@@ -10,18 +10,18 @@ import { APP_GUARD } from '@nestjs/core';
     JwtModule.registerAsync({
       global: true,
       useFactory: () => ({
-        secret: config.accessSecret,
+        secret: config.ACCESS_SECRET,
         signOptions: {
-          expiresIn: config.accessTime,
+          expiresIn: config.ACCESS_TIME,
         },
       }),
     }),
     JwtModule.registerAsync({
       global: true,
       useFactory: () => ({
-        secret: config.refreshSecret,
+        secret: config.REFRESH_SECRET,
         signOptions: {
-          expiresIn: config.refreshTime,
+          expiresIn: config.REFRESH_TIME,
         },
       }),
     }),

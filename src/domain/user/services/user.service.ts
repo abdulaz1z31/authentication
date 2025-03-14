@@ -14,7 +14,7 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>,
     private readonly hashingService: HashingService,
   ) {}
-  async isUsernameExists(username: string) {
+  async isUsernameExists(username: string): Promise<boolean> {
     if (!username) return false;
     const user = await this.userRepository.findOneBy({ username });
     return !!user;
@@ -35,8 +35,7 @@ export class UserService {
   }
 
   async findAll(): Promise<UserEntity[]> {
-    const users = await this.userRepository.find();
-    return users;
+    return await this.userRepository.find();
   }
 
   async findByUsername(username: string): Promise<UserEntity> {
@@ -64,12 +63,11 @@ export class UserService {
     return user;
   }
 
-  async findByRole(role: UserRoles) {
-    const users = await this.userRepository.find({ where: { role } });
-    return users;
+  async findByRole(role: UserRoles): Promise<UserEntity[]> {
+    return await this.userRepository.find({ where: { role } });
   }
 
-  async update(id: string, dto: UpdateUserDto) {
+  async update(id: string, dto: UpdateUserDto): Promise<UserEntity> {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -83,7 +81,7 @@ export class UserService {
     return user;
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<void> {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) {
       throw new NotFoundException('User not found');

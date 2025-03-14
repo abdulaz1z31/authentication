@@ -6,7 +6,7 @@ import { config } from '../config';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: config.dbUrl,
+      url: config.DB_URL,
       entities: ['dist/core/entity/*.entity{.ts,.js}'],
       synchronize: true,
       autoLoadEntities: true,

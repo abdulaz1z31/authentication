@@ -9,8 +9,8 @@ import { config } from '../config';
       transport: {
         service: 'gmail',
         auth: {
-          user: config.userEmail,
-          pass: config.appPassword,
+          user: config.USER_EMAIL,
+          pass: config.APP_PASSWORD,
         },
         port: 587,
       },
