@@ -36,13 +36,14 @@ if (missingVariables.length > 0) {
 }
 
 export const config: ConfigType = {
-  PORT: +process.env.APP_PORT,
+  PORT: +process.env.PORT,
   DB_URL: process.env.DB_URL,
   NODE_ENV: process.env.NODE_ENV,
-  ACCESS_SECRET: process.env.JWT_ACCESS_SECRET,
-  ACCESS_TIME: process.env.JWT_ACCESS_TIME,
-  REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
-  REFRESH_TIME: process.env.JWT_REFRESH_TIME,
+  ACCESS_SECRET: process.env.ACCESS_SECRET,
+  ACCESS_TIME: process.env.ACCESS_TIME,
+  REFRESH_SECRET: process.env.REFRESH_SECRET,
+  REFRESH_TIME: process.env.REFRESH_TIME,
   USER_EMAIL: process.env.USER_EMAIL,
   APP_PASSWORD: process.env.APP_PASSWORD,
 };
+console.log(config);

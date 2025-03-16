@@ -3,8 +3,8 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
-import { RegisterAuthDto } from '../dtos/register.dto';
-import { LoginAuthDto } from '../dtos/login.dto';
+import { RegisterDto } from '../dtos/register.dto';
+import { LoginDto } from '../dtos/login.dto';
 import { UserEntity, UserService } from 'src/domain/user';
 import { RedisService } from 'src/infrastructure/redis/redis.service';
 import { HashingService, MailService, TokenService } from 'src/infrastructure';
@@ -27,10 +27,10 @@ export class AuthService {
     private readonly hashingService: HashingService,
     private readonly jwtService: TokenService,
   ) {}
-  async register(data: RegisterAuthDto): Promise<UserEntity> {
+  async register(dto: RegisterDto): Promise<UserEntity> {
     const [exitingUsername, exitingEmail] = await Promise.all([
-      this.userService.isUsernameExists(data.username),
-      this.userService.isEmailExists(data.email),
+      this.userService.isUsernameExists(dto.username),
+      this.userService.isEmailExists(dto.email),
     ]);
     if (exitingUsername) {
       throw new ConflictException('Username already exists');
@@ -40,38 +40,38 @@ export class AuthService {
     }
     const otp = this.otpGenerator();
     await Promise.all([
-      this.redisService.set(data.username, otp, 240),
-      this.mailerService.sendOtp(data.email, otp),
+      this.redisService.set(dto.username, otp, 240),
+      this.mailerService.sendOtp(dto.email, otp),
     ]);
 
-    const user = await this.userService.create(data);
+    const user = await this.userService.create(dto);
     delete user.password;
     return user;
   }
-  async verify(data: VerifyDto): Promise<IMessage> {
-    const user = await this.userService.findById(data.id);
+  async verify(dto: VerifyDto): Promise<IMessage> {
+    const user = await this.userService.findById(dto.id);
     const otpCode = await this.redisService.get(user.username);
     if (!otpCode) {
       throw new BadRequestException('Time expired');
     }
-    if (otpCode != data.otp) {
+    if (otpCode != dto.otp) {
       throw new BadRequestException('Otp not valid');
     }
     const updateData = {
       is_active: true,
     };
-    await this.userService.update(data.id, updateData);
+    await this.userService.update(dto.id, updateData);
     return {
       message: 'Activated successfully',
     };
   }
-  async login(data: LoginAuthDto): Promise<ILogin> {
-    const user = await this.userService.findByEmail(data.email);
+  async login(dto: LoginDto): Promise<ILogin> {
+    const user = await this.userService.findByEmail(dto.email);
     if (!user.is_active) {
       throw new BadRequestException('User not activated');
     }
     const checkPassword = await this.hashingService.compare(
-      data.password,
+      dto.password,
       user.password,
     );
     if (!checkPassword) {
